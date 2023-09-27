@@ -93,6 +93,45 @@ def get_pizza():
         pizza_list=[{"id":pizza.id, "name":pizza.name, "ingredients":pizza.ingredients, "created":pizza.date_created, "updated":pizza.updated} for pizza in pizzas]
         return jsonify(pizza_list)
 
+@app.route('/pizza_restaurants', methods=["POST"])
+def post_pizzaRest():
+    if request.method == "POST":
+        try:
+            data = request.get_json()
+
+          
+            pizza_id = data.get('pizza_id')
+            restaurant_id = data.get('restaurant_id')
+            price = data.get('price')
+
+            
+            pizza = Pizza.query.get(pizza_id)
+            restaurant = Restaurant.query.get(restaurant_id)
+
+            if not pizza:
+                return jsonify({"error": f"Pizza with ID {pizza_id} not found"}), 404
+
+            if not restaurant:
+                return jsonify({"error": f"Restaurant with ID {restaurant_id} not found"}), 404
+
+            
+            new_restaurant_pizza = RestaurantPizza(
+                pizza_id=pizza_id,
+                restaurant_id=restaurant_id,
+                price=price
+            )
+
+            db.session.add(new_restaurant_pizza)
+            db.session.commit()
+
+            return jsonify({"message": "Pizza added to restaurant's menu successfully"}), 201
+
+        except Exception as e:
+            return jsonify({"error": "Error occurred"}), 500
+
+
+
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
